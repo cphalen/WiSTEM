@@ -1,0 +1,26 @@
+{
+  "name": "wistem",
+  "version": "1.0.0",
+  "description": "WiSTEM website designed by Ben Cifu, Ananya Asthana, and Campbell Phalen",
+  "main": "server.js",
+  "scripts": {
+    "test": "test"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/cphalen/WiSTEM.git"
+  },
+  "keywords": [
+    "WiSTEM",
+    "Woman",
+    "STEM",
+    "Math",
+    "Science"
+  ],
+  "author": "bcifu cphalen",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/cphalen/WiSTEM/issues"
+  },
+  "homepage": "https://github.com/cphalen/WiSTEM#readme"
+}
