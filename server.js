@@ -11,7 +11,7 @@ var cookieParser = require("cookie-parser");
 var logger = require("morgan");
 
 var express = require('express');
-app = express()
+var app = express();
 
 var redis = require('redis');
 client = redis.createClient();
@@ -37,7 +37,7 @@ app.use(session({
 app.use(passport.initialize());
 app.use(passport.session());
 app.use(cookieParser());
-app.use(logger('combined'));
+// app.use(logger('combined'));
 
 // Session-persisted message middleware
 app.use(function(req, res, next) {
@@ -134,37 +134,54 @@ function ensureAuthenticated(req, res, next) {
 }
 
 // ======== ROUTES ===========
-app.get('/', function(req, res) {
-    res.render('home', {
-        user: req.user
-    });
-});
 
-//displays our signup page
 app.get('/signin', function(req, res) {
-    res.render('signin');
+    res.render('signin', {layout: "blank"});
 });
 
-//sends the request through our local signup strategy, and if successful takes user to homepage, otherwise returns then to signin page
+app.get('*', function(req, res, next) {
+    if(req.user == null) {
+        res.redirect('/signin');
+    } else {
+        next();
+    }
+});
+
+app.get('/', function(req, res, next) {
+    if(req.user == null) {
+        res.redirect('/signin');
+    } else {
+        res.render('home', {
+            user: req.user,
+            home: true
+        });
+    }
+});
+
+app.get('/profile', function(req, res) {
+    res.render('profile', {
+        user: req.user,
+        login: true
+    })
+});
+
 app.post('/local-reg', passport.authenticate('local-signup', {
     successRedirect: '/',
     failureRedirect: '/signin'
 }));
 
 
-//sends the request through our local login/signin strategy, and if successful takes user to homepage, otherwise returns then to signin page
 app.post('/login', passport.authenticate('local-signin', {
     successRedirect: '/',
     failureRedirect: '/signin'
 }));
 
-//logs user out of site, deleting them from the session, and returns to homepage
 app.get('/logout', function(req, res) {
     var name = req.user.username;
     console.log("LOGGIN OUT " + req.user.username)
     req.logout();
     res.redirect('/');
-    req.session.notice = "You have successfully been logged out " + name + "!";
+    req.session.notice = "You have successfully been logged out " + name;
 });
 
 app.listen(port, (res) => {
