@@ -174,6 +174,12 @@ app.get("/forum", function(req, res){
 
 });
 
+/* plan for how to build the forums:
+1. set up some data base that will hold each post, maybe each thread is a single object, with every post a trait (i forget the word), ordered by the included timestamp
+2. build some backend functions that will 1, allow posting to the database, and 2, allow pulling a thread
+3. build the handlebar pages that let us view a thread
+*/
+
 app.post('/local-reg', passport.authenticate('local-signup', {
     successRedirect: '/',
     failureRedirect: '/signin'
