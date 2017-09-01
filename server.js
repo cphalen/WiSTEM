@@ -161,7 +161,7 @@ app.get('/', function(req, res, next) {
 app.get('/profile', function(req, res) {
     res.render('profile', {
         user: req.user,
-        login: true
+        login: true //is this correct?
     })
 });
 
