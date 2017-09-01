@@ -165,6 +165,15 @@ app.get('/profile', function(req, res) {
     })
 });
 
+app.get("/forum", function(req, res){
+
+    res.render("forum", {
+        user: req.user,
+        forum: true
+    });
+
+});
+
 app.post('/local-reg', passport.authenticate('local-signup', {
     successRedirect: '/',
     failureRedirect: '/signin'
