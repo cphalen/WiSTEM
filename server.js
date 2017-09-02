@@ -230,11 +230,31 @@ app.post('/forum-post', upload.single("image"), function(req, res) {
 });
 
 app.get("/blog", function(req, res){
+    console.log(req.user);
+    var isAdmin = false;
+    if(req.user.username == "admin"){
+        isAdmin = true;
+    }
 
     console.log(req.user);
         res.render('blog', {
         user: req.user,
         blog: true,
+        admin: isAdmin
+    });
+});
+
+app.post("/blogpost", upload.single("image"), function(req,res){
+    if(req.body.image != undefined) {
+        req.body.image = "\"" + req.file.path + "\"";
+    }
+    req.body.username = req.user.username;
+
+    client.INCR("blogCount");
+    client.GET("blogCount", function(error, reply) {
+        client.SET('blog:' + reply, JSON.stringify(req.body), function(error, reply) {
+            res.redirect("/blog"); // Bring them back to the page they started on
+        });
     });
 });
 
