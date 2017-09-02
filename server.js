@@ -197,6 +197,7 @@ app.get('/forum', function(req, res) {
                     post += "<img src=\"" + JSON.parse(posts[i].image) + "\"></img>";
                 }
                 post += "<h4> Submitted by user <b>" + posts[i].username + "</b></h4>"
+                post += "<br>";
             }
 
             res.render('forum', {
