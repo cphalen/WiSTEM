@@ -188,7 +188,7 @@ app.get('/forum', function(req, res) {
 
         Promise.all(gets).then((data) => {
             post = "";
-            for(var i = 0; i < posts.length; i++) {
+            for(var i = posts.length - 1; i >= 0; i--) {
                 posts[i] = JSON.parse(posts[i]);
                 post += "<h3>" + posts[i].headline.replace(/["']/g, "") + "</h3>";
                 post += "<p>" + posts[i].body.replace(/["']/g, "") + "</p>";
@@ -216,8 +216,6 @@ app.get('/failed-post', function(req, res) {
 });
 
 app.post('/forum-post', upload.single("image"), function(req, res) {
-    // console.log(req.body.image != "");
-    // console.log(req.body.image);
     if(req.body.image != undefined) {
         req.body.image = "\"" + req.file.path + "\"";
     }
