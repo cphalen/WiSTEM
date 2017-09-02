@@ -26,6 +26,14 @@ client.on("error", (error) => {
     console.log("Error " + error);
 });
 
+//array of admins who will be able to add blog posts or delete forum posts
+var adminsArray = [
+"admin",
+"aasthana",
+"bcifu",
+"cphalen"
+]
+
 // Allows us to parse JSON from POST
 //app.use(bodyParser.JSON());
 
@@ -232,9 +240,14 @@ app.post('/forum-post', upload.single("image"), function(req, res) {
 app.get("/blog", function(req, res){
 
     var isAdmin = false;
-    if(req.user.username == "admin"){
-        isAdmin = true;
-    }
+
+    adminsArray.forEach(function(admin){
+
+        if(admin == req.user.username){
+            isAdmin = true;
+        }
+
+    });
 
     posts = [];
     gets = [];
