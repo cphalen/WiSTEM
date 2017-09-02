@@ -230,17 +230,47 @@ app.post('/forum-post', upload.single("image"), function(req, res) {
 });
 
 app.get("/blog", function(req, res){
-    console.log(req.user);
+
     var isAdmin = false;
     if(req.user.username == "admin"){
         isAdmin = true;
     }
 
-    console.log(req.user);
-        res.render('blog', {
-        user: req.user,
-        blog: true,
-        admin: isAdmin
+    posts = [];
+    gets = [];
+
+    client.GET("blogCount", (error, reply) => {
+        count = parseInt(reply);
+
+        for(var i = 1; i <= count; i++) {
+            gets.push(client.getAsync("blog:" + i).then((result) => {
+                posts.push(result);
+            }));
+        }
+
+        Promise.all(gets).then((data) => {
+            post = "";
+            for(var i = posts.length - 1; i >= 0; i--) {
+                posts[i] = JSON.parse(posts[i]);
+                post += "<h3>" + posts[i].headline.replace(/["']/g, "") + "</h3>";
+                post += "<p>" + posts[i].body.replace(/["']/g, "") + "</p>";
+                post += "<br>";
+                if(posts[i].image) {
+                    post += "<img src=\"" + JSON.parse(posts[i].image) + "\"></img>";
+                }
+                post += "<h4> Submitted by user <b>" + posts[i].username + "</b></h4>"
+                post += "<br>";
+            }
+
+            res.render('blog', {
+                user: req.user,
+                blog: true,
+                posts: post,
+                admin: isAdmin
+            });
+        }).catch((error) => {
+            console.log(error);
+        });
     });
 });
 
