@@ -169,7 +169,7 @@ app.get('/profile', function(req, res) {
     console.log(req.user);
     res.render('profile', {
         user: req.user,
-        login: true
+        login: true //is this correct?
     })
 });
 
