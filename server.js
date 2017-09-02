@@ -229,6 +229,15 @@ app.post('/forum-post', upload.single("image"), function(req, res) {
     });
 });
 
+app.get("/blog", function(req, res){
+
+    console.log(req.user);
+        res.render('blog', {
+        user: req.user,
+        blog: true,
+    });
+});
+
 app.post('/local-reg', passport.authenticate('local-signup', {
     successRedirect: '/',
     failureRedirect: '/signin'
