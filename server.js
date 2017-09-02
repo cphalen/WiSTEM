@@ -216,7 +216,9 @@ app.get('/failed-post', function(req, res) {
 });
 
 app.post('/forum-post', upload.single("image"), function(req, res) {
-    if(req.body.image != "") {
+    // console.log(req.body.image != "");
+    // console.log(req.body.image);
+    if(req.body.image != undefined) {
         req.body.image = "\"" + req.file.path + "\"";
     }
     req.body.username = req.user.username;
