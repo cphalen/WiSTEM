@@ -10,6 +10,12 @@ var bodyParser = require('body-parser');
 var cookieParser = require("cookie-parser");
 var logger = require("morgan");
 
+// These two dependencies for file uploading
+var path = require('path');
+var fs = require('file-system');
+var multer  = require('multer')
+var upload = multer({ dest: 'uploads/' })
+
 var express = require('express');
 var app = express();
 
@@ -38,6 +44,7 @@ app.use(passport.initialize());
 app.use(passport.session());
 app.use(cookieParser());
 // app.use(logger('combined'));
+app.use("/uploads", express.static(__dirname + "/uploads"));
 
 // Session-persisted message middleware
 app.use(function(req, res, next) {
@@ -72,7 +79,6 @@ passport.use('local-signin', new LocalStrategy({
         passwordField: 'password'
     },
     function(req, username, password, done) {
-        console.log("HERE IN LOCAL SIGNUP");
         login.localAuth(username, password)
             .then(function(user) {
                 if (user) {
@@ -133,6 +139,7 @@ function ensureAuthenticated(req, res, next) {
     res.redirect('/signin');
 }
 
+
 // ======== ROUTES ===========
 
 app.get('/signin', function(req, res) {
@@ -159,10 +166,66 @@ app.get('/', function(req, res, next) {
 });
 
 app.get('/profile', function(req, res) {
+    console.log(req.user);
     res.render('profile', {
         user: req.user,
         login: true
     })
+});
+
+app.get('/forum', function(req, res) {
+    posts = [];
+    gets = [];
+
+    client.GET("postCount", (error, reply) => {
+        count = parseInt(reply);
+
+    	for(var i = 1; i <= count; i++) {
+    	    gets.push(client.getAsync("forum:" + i).then((result) => {
+        		posts.push(result);
+            }));
+    	}
+
+        Promise.all(gets).then((data) => {
+            post = "";
+            for(var i = 0; i < posts.length; i++) {
+                posts[i] = JSON.parse(posts[i]);
+                post += "<h3>" + posts[i].headline.replace(/["']/g, "") + "</h3>";
+                post += "<p>" + posts[i].body.replace(/["']/g, "") + "</p>";
+                post += "<br>";
+                if(posts[i].image) {
+                    post += "<img src=\"" + JSON.parse(posts[i].image) + "\"></img>";
+                }
+                post += "<h4> Submitted by user <b>" + posts[i].username + "</b></h4>"
+            }
+
+            res.render('forum', {
+                user: req.user,
+                forum: true,
+                posts: post
+            });
+        }).catch((error) => {
+            console.log(error);
+        });
+    });
+});
+
+app.get('/failed-post', function(req, res) {
+	res.render('failed-post');
+});
+
+app.post('/forum-post', upload.single("image"), function(req, res) {
+    if(req.body.image != "") {
+        req.body.image = "\"" + req.file.path + "\"";
+    }
+    req.body.username = req.user.username;
+
+    client.INCR("postCount");
+    client.GET("postCount", function(error, reply) {
+        client.SET('forum:' + reply, JSON.stringify(req.body), function(error, reply) {
+    	    res.redirect("/forum"); // Bring them back to the page they started on
+        });
+    });
 });
 
 app.post('/local-reg', passport.authenticate('local-signup', {

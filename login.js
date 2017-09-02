@@ -64,3 +64,18 @@ exports.localAuth = function(username, password) {
 
     return deferred.promise;
 }
+
+exports.getPostList = function() {
+    var client = redis.createClient();
+    client.lrangeAsync( "posts", 0, -1 )
+        .then((result) => {
+            return result;
+        });
+}
+
+exports.redisGetSynch = function(client, key) {
+    client.getAsync(key).then((result) => {
+        console.log(result);
+        return result;
+    })
+}
