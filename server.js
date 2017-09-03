@@ -185,6 +185,13 @@ app.get('/forum', function(req, res) {
     posts = [];
     gets = [];
 
+    var isAdmin = false;
+    adminsArray.forEach(function(admin){
+        if(admin == req.user.username){
+            isAdmin = true;
+        }
+    });
+
     client.GET("postCount", (error, reply) => {
         count = parseInt(reply);
 
@@ -206,6 +213,9 @@ app.get('/forum', function(req, res) {
                 }
                 post += "<h4> Submitted by user <b>" + posts[i].username + "</b></h4>"
                 post += "<br>";
+                if(isAdmin){
+                    post += "<a href=/remove-post?removePost=" + count + ">Remvoe this post</a><br>"; //count, moving up from bottom, starts at 1
+                }
             }
 
             res.render('forum', {
@@ -235,6 +245,29 @@ app.post('/forum-post', upload.single("image"), function(req, res) {
     	    res.redirect("/forum"); // Bring them back to the page they started on
         });
     });
+});
+
+app.get("/remove-post", function(req, res){ //can you add in promises?
+
+    deleteID = req.query.removePost;
+
+    client.del("forum:" + deleteID, function(err1, responce){
+        if(responce == 1){
+            console.log("delete success");
+
+            client.decr("postCount", function(err2, responce1){
+                if(responce == 1){
+                    console.log("decrement success");
+                    res.redirect("/forum");
+                }
+            });
+        } else {
+            console.log(err1);
+            console.log("delete failed");
+            //REDIRECT TO A FAIL PAGE
+        }
+    });
+
 });
 
 app.get("/blog", function(req, res){
