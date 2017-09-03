@@ -251,22 +251,26 @@ app.get("/remove-post", function(req, res){ //can you add in promises?
 
     deleteID = req.query.removePost;
 
-    client.del("forum:" + deleteID, function(err1, responce){
-        if(responce == 1){
-            console.log("delete success");
-
-            client.decr("postCount", function(err2, responce1){
+    adminsArray.forEach(function(admin){
+        if(admin == req.user.username){
+            
+            client.del("forum:" + deleteID, function(err1, responce){
                 if(responce == 1){
-                    console.log("decrement success");
-                    res.redirect("/forum");
+                    console.log("delete success");
+                    client.decr("postCount", function(err2, responce1){
+                        if(responce == 1){
+                            console.log("decrement success");
+                            res.redirect("/forum");
+                        }
+                    });
+                } else {
+                console.log(err1);
+                console.log("delete failed");
+                //REDIRECT TO A FAIL PAGE
                 }
             });
-        } else {
-            console.log(err1);
-            console.log("delete failed");
-            //REDIRECT TO A FAIL PAGE
         }
-    });
+    });  
 
 });
 
