@@ -174,7 +174,6 @@ app.get('/', function(req, res, next) {
 });
 
 app.get('/profile', function(req, res) {
-    console.log(req.user);
     res.render('profile', {
         user: req.user,
         login: true //is this correct?
@@ -204,6 +203,10 @@ app.get('/forum', function(req, res) {
         Promise.all(gets).then((data) => {
             post = "";
             for(var i = posts.length - 1; i >= 0; i--) {
+                if (posts[i] == null) {
+                    continue;
+                }
+
                 posts[i] = JSON.parse(posts[i]);
                 post += "<h3>" + posts[i].headline.replace(/["']/g, "") + "</h3>";
                 post += "<p>" + posts[i].body.replace(/["']/g, "") + "</p>";
@@ -212,10 +215,10 @@ app.get('/forum', function(req, res) {
                     post += "<img src=\"" + JSON.parse(posts[i].image) + "\"></img>";
                 }
                 post += "<h4> Submitted by user <b>" + posts[i].username + "</b></h4>"
-                post += "<br>";
-                if(isAdmin){
-                    post += "<a href=/remove-post?removePost=" + count + ">Remvoe this post</a><br>"; //count, moving up from bottom, starts at 1
+                if(isAdmin || posts[i].username == req.user.username){
+                    post += "<a href=/remove-post?removePost=" + (i + 1) + ">Remove this post</a><br>"; //count, moving up from bottom, starts at 1
                 }
+                post += "<br>";
             }
 
             res.render('forum', {
@@ -234,7 +237,7 @@ app.get('/failed-post', function(req, res) {
 });
 
 app.post('/forum-post', upload.single("image"), function(req, res) {
-    if(req.body.image != undefined) {
+    if(req.file != undefined) {
         req.body.image = "\"" + req.file.path + "\"";
     }
     req.body.username = req.user.username;
@@ -250,39 +253,39 @@ app.post('/forum-post', upload.single("image"), function(req, res) {
 app.get("/remove-post", function(req, res){ //can you add in promises?
 
     deleteID = req.query.removePost;
+    client.get("forum:" + deleteID, (error, result) => {
+        if(JSON.parse(result).username == req.user.username) {
+            deletePost(client, deleteID, res);
+        } else {
+            adminsArray.forEach(function(admin){
+                if(admin == req.user.username){
+                    deletePost(client, deleteID, res);
+                }
+            });
+        }
+    });
+});
 
-    adminsArray.forEach(function(admin){
-        if(admin == req.user.username){
-            
-            client.del("forum:" + deleteID, function(err1, responce){
-                if(responce == 1){
-                    console.log("Forum post delete success");
-                    client.decr("postCount", function(err2, responce1){
-                        if(responce == 1){
-                            console.log("decrement success");
-                            res.redirect("/forum");
-                        } else {
-                            var errToReport = "Failed to delete post " + deleteID + ". " + err2;
-                            res.render("failed-delete", {
-                                user: req.user,
-                                failedPost: true,
-                                failInfo: errToReport
-                            });
-                        }
-                    });
-                } else {
+function deletePost(client, deleteID, res) {
+    client.get("forum:" + deleteID, (error, reply) => {
+        client.del("forum:" + deleteID, function(err1, responce){
+            if(responce == 1){
+                url = JSON.parse(reply).image;
+                if(url != undefined) {
+                    fs.unlinkSync(url.replace(/["']/g, ""));
+                }
+                res.redirect("/forum");
+            } else {
                 var errToReport = "Failed to delete post " + deleteID + ". " + err1;
                 res.render("failed-delete", {
                     user: req.user,
                     failedPost: true,
                     failInfo: errToReport
                 });
-                }
-            });
-        }
-    });  
-
-});
+            }
+        });
+    });
+}
 
 app.get("/blog", function(req, res){
 
