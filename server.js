@@ -253,9 +253,9 @@ app.get('/forum', function(req, res) {
                     var dimensions = sizeOf("\"" + JSON.parse(posts[i].image) + "\""); //this may need a .jpg
                     console.log(dimensions.width, dimensions.height);
                     if(dimensions.width > 500){
-                        post += "<img style='width:500px;' src=.\"" + JSON.parse(posts[i].image) + "\"></img>";
+                        post += "<img width='500px' src=.\"" + JSON.parse(posts[i].image) + "\"></img>";
                     } else if(dimensions.height > 500){
-                        post += "<img style='height:500px;' src=\"" + JSON.parse(posts[i].image) + "\"></img>";
+                        post += "<img height='500px' src=\"" + JSON.parse(posts[i].image) + "\"></img>";
                     } else {
                         post += "<img src=\"" + JSON.parse(posts[i].image) + "\"></img>";
                     }
