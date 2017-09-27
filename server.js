@@ -184,7 +184,7 @@ app.get('/profile', function(req, res) {
 app.post("/update-profile", function(req, res){
     //THIS CODE HAS PROBLEMS, I AM TRYING TO FIX IT, BUT IT IS A WIP
     // console.log(JSON.stringify(req.body.school));
-    
+
     // client.GET("users:" + req.user.username, (error, reply) => {
     //     console.log(req.user);
     //     console.log(req.user.username);
@@ -250,16 +250,18 @@ app.get('/forum', function(req, res) {
                 post += "<p>" + posts[i].body.replace(/["']/g, "") + "</p>";
                 post += "<br>";
                 if(posts[i].image) {
-                    var dimensions = sizeOf("\"" + JSON.parse(posts[i].image) + "\""); //this may need a .jpg
-                    console.log(dimensions.width, dimensions.height);
-                    if(dimensions.width > 500){
-                        post += "<img width='500px' src=.\"" + JSON.parse(posts[i].image) + "\"></img>";
-                    } else if(dimensions.height > 500){
-                        post += "<img height='500px' src=\"" + JSON.parse(posts[i].image) + "\"></img>";
-                    } else {
-                        post += "<img src=\"" + JSON.parse(posts[i].image) + "\"></img>";
+                    var dimensions = sizeOf(JSON.parse(posts[i].image)); //this may need a .jpg
+                    string = "";
+                    if(dimensions.width > 300){
+                        string = "width='300'";
                     }
-                    
+
+                    if(dimensions.height > 300 && dimensions.height > dimensions.width){
+                        string = "height='300'";
+                    }
+
+                    post += "<img " + string + " src=\"" + JSON.parse(posts[i].image) + "\"></img>";
+
                 }
                 post += "<h4> Submitted by user <b>" + posts[i].username + "</b></h4>"
                 if(isAdmin || posts[i].username == req.user.username){
