@@ -175,47 +175,29 @@ app.get('/', function(req, res, next) {
 });
 
 app.get('/profile', function(req, res) {
-    res.render('profile', {
-        user: req.user,
-        login: true //is this correct?
-    })
+    client.GET("users:" + req.user.username, (error, reply) => {
+        user = JSON.parse(reply);
+
+        res.render('profile', {
+            user: user,
+            profile: true
+        });
+    });
 });
 
 app.post("/update-profile", function(req, res){
     //THIS CODE HAS PROBLEMS, I AM TRYING TO FIX IT, BUT IT IS A WIP
     // console.log(JSON.stringify(req.body.school));
 
-    // client.GET("users:" + req.user.username, (error, reply) => {
-    //     console.log(req.user);
-    //     console.log(req.user.username);
-    //     console.log(JSON.stringify(reply));
-    //     console.log(reply);
-    //     if(req.body.username == req.user.username){
-    //         //NO USERNAME CHANGE, CONTINUE
-    //         client.SET('users:' + req.user.username, JSON.stringify(req.body), function(error, reply) {
-    //             console.log("USER CHANGED: " + JSON.stringify(reply));
-    //             //res.redirect("/profile"); // SHOW CHANGE
-    //         });
-    //     } else if (req.body.username != req.user.username){
-    //         //username change
-    //         client.GET("users:" + req.body.username), (error, reply) => {
-    //             if(null != results){
-    //                 console.log("ATTEMPTED NEW USERNAME EXISTS");
-    //                 res.redirect("/profile"); //ADD IN SOMETHING TO SHOW THAT USERNAME EXISTS
-    //             } else {
-    //                 client.SET('users:' + req.user.username, JSON.stringify(req.body), function(error, reply) {
-    //                     console.log("USER CHANGED: " + JSON.stringify(reply));
-    //                     res.redirect("/profile"); // SHOW CHANGE
-    //                 });
-    //             }
-    //         }
-    //     } else {
-    //         console.log("error with usernames, redirecting");
-    //         res.redirect("/profile");
-    //     }
-    // });
+    client.GET("users:" + req.user.username, (error, reply) => {
+        user = JSON.parse(reply);
+        post = Object.assign(user, req.body);
 
-    // res.redirect("/profile");
+        client.SET("users:" + req.user.username, JSON.stringify(post), (error, reply) => {
+            res.redirect("/profile");
+        });
+
+    });
 });
 
 app.get('/forum', function(req, res) {
