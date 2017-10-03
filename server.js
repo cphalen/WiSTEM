@@ -185,6 +185,18 @@ app.get('/profile', function(req, res) {
     });
 });
 
+app.get("/view-profile", function(req, res){
+    client.GET("users:" + req.query.username, (error, reply) => {
+        user = JSON.parse(reply);
+
+        res.render('view-profile', {
+            user: user,
+            profile: true
+        });
+    });
+
+});
+
 app.post("/update-profile", function(req, res){
     //THIS CODE HAS PROBLEMS, I AM TRYING TO FIX IT, BUT IT IS A WIP
     // console.log(JSON.stringify(req.body.school));
@@ -245,7 +257,7 @@ app.get('/forum', function(req, res) {
                     post += "<img " + string + " src=\"" + JSON.parse(posts[i].image) + "\"></img>";
 
                 }
-                post += "<h4> Submitted by user <b>" + posts[i].username + "</b></h4>"
+                post += "<h4> Submitted by user <b><a href='/view-profile?username=" + posts[i].username + "'>" + posts[i].username + "</a></b></h4>"
                 if(isAdmin || posts[i].username == req.user.username){
                     post += "<a href=/remove-post?removePost=" + (i + 1) + ">Remove this post</a><br>"; //count, moving up from bottom, starts at 1
                 }
@@ -352,7 +364,7 @@ app.get("/blog", function(req, res){
                 if(posts[i].image) {
                     post += "<img src=\"" + JSON.parse(posts[i].image) + "\"></img>";
                 }
-                post += "<h4> Submitted by user <b>" + posts[i].username + "</b></h4>"
+                post += "<h4> Submitted by user <b><a href='/view-profile?username=" + posts[i].username + "'>" + posts[i].username + "</a></b></h4>"
                 post += "<br>";
             }
 
