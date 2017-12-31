@@ -21,6 +21,7 @@ var express = require('express');
 var app = express();
 
 var redis = require('redis');
+var sanitizer = require('sanitizer');
 client = redis.createClient();
 
 client.on("error", (error) => {
@@ -176,7 +177,8 @@ app.get('/', function(req, res, next) {
 
 app.get('/profile', function(req, res) {
     client.GET("users:" + req.user.username, (error, reply) => {
-        user = JSON.parse(reply);
+        // Sanitize user data
+        user = JSON.parse(sanitizer.sanitize(reply));
 
         res.render('profile', {
             user: user,
@@ -187,7 +189,8 @@ app.get('/profile', function(req, res) {
 
 app.get("/view-profile", function(req, res){
     client.GET("users:" + req.query.username, (error, reply) => {
-        user = JSON.parse(reply);
+        // Sanitize user data
+        user = JSON.parse(sanitizer.sanitize(reply));
 
         res.render('view-profile', {
             user: user,
@@ -240,8 +243,9 @@ app.get('/forum', function(req, res) {
                 }
 
                 posts[i] = JSON.parse(posts[i]);
-                post += "<h3>" + posts[i].headline.replace(/["']/g, "") + "</h3>";
-                post += "<p>" + posts[i].body.replace(/["']/g, "") + "</p>";
+                // Sanitize data displayed to the page
+                post += "<h3>" + sanitizer.escape(posts[i].headline).replace(/["']/g, "") + "</h3>";
+                post += "<p>" + sanitizer.escape(posts[i].body).replace(/["']/g, "") + "</p>";
                 post += "<br>";
                 if(posts[i].image) {
                     var dimensions = sizeOf(JSON.parse(posts[i].image)); //this may need a .jpg
