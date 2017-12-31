@@ -4,7 +4,8 @@
   "description": "WiSTEM website designed by Ben Cifu, Ananya Asthana, and Campbell Phalen",
   "main": "server.js",
   "scripts": {
-    "test": "test"
+    "test": "test",
+    "start": "redis-server & python backup.py & node server.js"
   },
   "repository": {
     "type": "git",
